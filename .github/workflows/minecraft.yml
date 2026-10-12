@@ -19,7 +19,7 @@ jobs:
       - name: Download and Setup Bedrock Server
         run: |
           mkdir server && cd server
-          curl -H "User-Agent: Mozilla/5.0" -o bedrock-server.zip https://minecraft.azureedge.net/bin-linux/bedrock-server-1.20.81.01.zip
+          curl -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)" -L -o bedrock-server.zip https://www.minecraft.net/bedrockdedicatedserver/bin-linux/bedrock-server-1.21.60.03.zip
           unzip bedrock-server.zip
           chmod +x bedrock_server
 
