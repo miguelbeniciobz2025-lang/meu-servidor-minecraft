@@ -1,0 +1,64 @@
+name: Minecraft Bedrock Server 24/7
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java / Environment
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Download Bedrock Server
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl unzip jq libssl-dev
+          mkdir -p server && cd server
+          URL=$(curl -fsSL -A "Mozilla/5.0" \
+            https://net-secondary.web.minecraft-services.net/api/v1.0/download/links \
+            | jq -r '.result.links[] | select(.downloadType=="serverBedrockLinux") | .downloadUrl')
+          echo "URL: $URL"
+          [ -n "$URL" ] || { echo "Não encontrei o URL de download"; exit 1; }
+          curl -fL -A "Mozilla/5.0" -o bedrock-server.zip "$URL"
+          SIZE=$(stat -c%s bedrock-server.zip)
+          echo "Tamanho: $SIZE bytes"
+          [ "$SIZE" -gt 1000000 ] || { echo "Download inválido:"; head -c 200 bedrock-server.zip; exit 1; }
+          unzip -o bedrock-server.zip
+          chmod +x bedrock_server
+
+      - name: Start Minecraft Bedrock Server
+        run: |
+          echo "A ligar o servidor de Minecraft Bedrock..."
+          cd server
+          export LD_LIBRARY_PATH=.
+          nohup sh -c 'tail -f /dev/null | ./bedrock_server' > ../server.log 2>&1 &
+          sleep 10
+          cat ../server.log
+
+      - name: Setup Playit.gg
+        env:
+          PLAYIT_SECRET: ${{ secrets.PLAYIT_SECRET }}
+        run: |
+          curl -fsSL https://playit-cloud.github.io/ppa/key.gpg | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/playit.gpg > /dev/null
+          echo "deb [signed-by=/etc/apt/trusted.gpg.d/playit.gpg] https://playit-cloud.github.io/ppa/data ./" | sudo tee /etc/apt/sources.list.d/playit-cloud.list
+          sudo apt-get update
+          sudo apt-get install -y playit
+          nohup playit --secret "$PLAYIT_SECRET" > playit.log 2>&1 &
+          sleep 5
+          cat playit.log
+
+      - name: Keep Server Running
+        run: |
+          # Mantém o workflow ativo para o servidor não desligar
+          while true; do
+            sleep 60
+          done
