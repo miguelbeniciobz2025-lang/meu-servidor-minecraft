@@ -19,7 +19,7 @@ jobs:
       - name: Download and Setup Bedrock Server
         run: |
           mkdir -p server && cd server
-          curl -L -o bedrock-server.zip "https://github.com/LiteLoaderBedrock/BedrockDedicatedServer/releases/download/v1.21.50.29/bedrock-server-1.21.50.29.zip"
+          curl -sSL -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)" -o bedrock-server.zip "https://www.minecraft.net/bedrockdedicatedserver/bin-linux/bedrock-server-1.21.50.29.zip"
           unzip -o bedrock-server.zip
           chmod +x bedrock_server
 
