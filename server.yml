@@ -1,0 +1,38 @@
+name: Minecraft Bedrock Server 24/7
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+  
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl unzip libssl-dev
+
+      - name: Download and Setup Bedrock Server
+        run: |
+          mkdir -p server && cd server
+          curl -L -o bedrock-server.zip "https://github.com/LiteLoaderBedrock/BedrockDedicatedServer/releases/download/v1.21.50.29/bedrock-server-1.21.50.29.zip"
+          unzip -o bedrock-server.zip
+          chmod +x bedrock_server
+
+      - name: Setup and Run Playit.gg Tunnel
+        run: |
+          curl -SsL https://playit-cloud.github.io/ppa/key.gpg | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/playit.gpg > /dev/null
+          echo "deb [signed-by=/etc/apt/trusted.gpg.d/playit.gpg] https://packagecloud.io/playit-cloud/playit/any/ any main" | sudo tee /etc/apt/sources.list.d/playit.list
+          sudo apt-get update && sudo apt-get install -y playit
+          playit &
+
+      - name: Start Minecraft Bedrock Server
+        run: |
+          cd server
+          export LD_LIBRARY_PATH=.
+          ./bedrock_server
+          
