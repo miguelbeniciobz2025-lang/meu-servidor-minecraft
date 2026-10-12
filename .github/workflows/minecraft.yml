@@ -14,16 +14,13 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt update
-          sudo apt install -y libcurl4 libssl-dev unzip curl jq
+          sudo apt install -y libcurl4 libssl-dev unzip curl
 
       - name: Download and Setup Bedrock Server
         run: |
           mkdir server && cd server
-          # Usando link direto espelhado e fiável para Bedrock BDS Linux
-          curl -sSL -H "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0" -o bedrock-server.zip "https://www.minecraft.net/bedrockdedicatedserver/bin-linux/bedrock-server-1.21.50.29.zip" || \
-          curl -sSL -H "User-Agent: Mozilla/5.0" -o bedrock-server.zip "https://discord.hexxed.workers.dev/api/download/bds"
-          
-          unzip -o bedrock-server.zip
+          curl -L -o bedrock-server.zip "https://github.com/LiteLoaderBedrock/BedrockDedicatedServer/releases/download/v1.21.50.29/bedrock-server-1.21.50.29.zip"
+          unzip bedrock-server.zip
           chmod +x bedrock_server
 
       - name: Download and Start Playit.gg (Túnel IP Bedrock)
